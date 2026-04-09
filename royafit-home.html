@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoyaFit — Fitness on Demand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Boogaloo&family=Boldonse&family=Montserrat:ital,wght@0,400;0,500;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lime:      #CDDC29;
+    --lime-dark: #A8B520;
+    --cyan:      #0ABACE;
+    --cyan-dark: #0899AF;
+    --dark:      #1A1A1A;
+    --dark-mid:  #2C2C2C;
+    --gray:      #5A5A5A;
+    --off-white: #F5F5F0;
+    --white:     #FFFFFF;
+    --font-heading: 'Boldonse', sans-serif;
+    --font-body:    'Montserrat', sans-serif;
+  }
+
+  html { scroll-behavior: initial; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--white);
+    color: var(--dark);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  @media (hover: none) {
+    body { cursor: auto; }
+    .custom-cursor { display: none !important; }
+  }
+
+  /* ── CUSTOM CURSOR ── */
+  .custom-cursor {
+    position: fixed;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--lime);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    top: 0; left: 0;
+    transform: translate(-50%, -50%);
+    transition: width 0.15s ease, height 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    will-change: transform;
+  }
+  .custom-cursor.cursor-large {
+    width: 56px;
+    height: 56px;
+    background: rgba(205, 220, 41, 0.18);
+    border-color: var(--lime);
+  }
+  .custom-cursor.cursor-small {
+    width: 10px;
+    height: 10px;
+    background: var(--lime);
+    border-color: var(--lime);
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    height: 8px;
+    background: var(--lime);
+    width: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: transparent;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+  }
+
+  .nav-logo {
+    font-family: var(--font-body);
+    font-weight: 900;
+    font-size: 15px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dark);
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+  .nav-logo span {
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    color: var(--cyan);
+    text-transform: lowercase;
+    margin-top: 2px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--dark);
+    transition: color 0.2s;
+  }
+  .nav-links a:hover,
+  .nav-links a.active { color: var(--lime-dark); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .btn-signin {
+    background: var(--dark);
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 9px 20px;
+    border-radius: 2px;
+    transition: background 0.2s;
+  }
+  .btn-signin:hover { background: var(--lime-dark); color: var(--dark); }
+
+  .nav-hamburger {
+    width: 36px;
+    height: 36px;
+    background: var(--dark);
+    border-radius: 50%;
+    border: none;
+    cursor: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .nav-hamburger span {
+    display: block;
+    width: 14px;
+    height: 1.5px;
+    background: var(--white);
+  }
+
+  .hero-scroll-hero {
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    background: var(--dark);
+  }
+
+  /* Background photo — full bleed */
+  .hero-bg-photo {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .hero-bg-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  /* Mandala bg — very subtle, left side */
+  .hero-bg-mandala {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 4vw;
+    opacity: 0.06;
+    pointer-events: none;
+  }
+  .hero-bg-mandala svg {
+    width: 60vmin;
+    height: 60vmin;
+  }
+
+  /* Right-side text panel */
+  .hero-text-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 80px 48px 48px;
+    z-index: 3;
+  }
+
+  /* Headline block — left aligned */
+  .hero-headline-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: clamp(0.65rem, 1.2vw, 0.875rem);
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 32px;
+  }
+
+  .hero-line--static {
+    font-family: 'Boldonse', sans-serif;
+    font-size: clamp(5rem, 10vw, 10rem);
+    line-height: 1;
+    color: var(--dark);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+
+  .hero-line--cycle {
+    position: relative;
+    height: clamp(5rem, 10vw, 10rem);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .cycle-word {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    font-family: 'Boldonse', sans-serif;
+    font-size: clamp(5rem, 10vw, 10rem);
+    line-height: 1;
+    color: var(--cyan);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  /* Line 3 words are dark */
+  #cycleLine3 .cycle-word { color: var(--dark); }
+
+  .hero-cta-wrap {
+    display: flex;
+    align-items: center;
+    margin-top: 36px;
+  }
+
+  /* Progress dots — right edge */
+  .hero-progress {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10;
+  }
+  .hero-progress-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1.5px solid var(--dark);
+    transition: background 0.3s, border-color 0.3s, transform 0.3s;
+  }
+  .hero-progress-dot.active {
+    background: var(--lime);
+    border-color: var(--cyan);
+    transform: scale(1.4);
+  }
+
+  /* Scroll hint */
+  .hero-scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+  }
+  .hero-scroll-hint span {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--cyan), transparent);
+    animation: scrollPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%   { transform: scaleY(0); transform-origin: top; opacity: 1; }
+    50%  { transform: scaleY(1); transform-origin: top; opacity: 1; }
+    100% { transform: scaleY(1); transform-origin: top; opacity: 0; }
+  }
+
+  /* ── SPLIT CTA BUTTON ── */
+  .btn-split {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .btn-split:hover .btn-primary,
+  .btn-split:hover .btn-arrow { transform: translateX(4px); }
+
+  .btn-primary {
+    background: var(--lime);
+    color: var(--dark);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 13px 24px;
+    transition: background 0.2s, transform 0.22s ease;
+  }
+  .btn-primary:hover { background: var(--lime-dark); }
+
+  .btn-arrow {
+    background: var(--dark);
+    color: var(--lime);
+    font-size: 14px;
+    padding: 13px 16px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.22s ease;
+  }
+  .btn-arrow:hover { background: #333; }
+
+
+  /* ── GRAIN TEXTURE ── */
+  .has-grain { position: relative; }
+  .has-grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* ── WELCOME ── */
+  .welcome {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 520px;
+  }
+  .welcome-photo {
+    position: relative;
+    overflow: hidden;
+    background: var(--cyan);
+  }
+  .welcome-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .welcome-frame {
+    position: absolute;
+    top: 32px; left: 32px; right: 32px; bottom: 32px;
+    border: 2px solid var(--lime);
+    pointer-events: none;
+    z-index: 2;
+  }
+  .welcome-content {
+    padding: 80px 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--white);
+  }
+
+  .section-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 16px;
+  }
+  .section-heading {
+    font-family: 'Boldonse', sans-serif;
+    font-weight: 400;
+    font-size: clamp(1.6rem, 3vw, 2.6rem);
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: var(--dark);
+    margin-bottom: 24px;
+  }
+  .section-heading em {
+    font-style: normal;
+    color: var(--cyan);
+  }
+  .section-body {
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--gray);
+    margin-bottom: 36px;
+    max-width: 440px;
+  }
+
+  /* ── CLASSES GRID ── */
+  .classes-section {
+    padding: 80px 0 0;
+    background: var(--off-white);
+  }
+  .classes-intro {
+    padding: 0 80px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .classes-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 1fr;
+  }
+
+  .grid-cell {
+    position: relative;
+    overflow: hidden;
+    cursor: none;
+    will-change: transform;
+    aspect-ratio: 1 / 1;
+  }
+  .grid-cell.dark {
+    background: var(--dark);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+  .grid-cell.lime { background: var(--lime); }
+  .grid-cell.cyan { background: var(--cyan); }
+  .grid-cell.photo { background: #ccc; }
+
+  .grid-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+  }
+  .grid-cell:hover img { transform: scale(1.06); }
+
+  .cell-content {
+    position: absolute;
+    inset: 0;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    z-index: 2;
+  }
+
+  .cell-tag {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 8px;
+  }
+  .grid-cell.lime .cell-tag { color: rgba(0,0,0,0.5); }
+
+  .cell-title {
+    font-family: 'Boldonse', sans-serif;
+    font-weight: 400;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    line-height: 1.15;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+  .grid-cell.lime .cell-title { color: var(--dark); }
+
+  .cell-desc {
+    font-size: 12px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .grid-cell.lime .cell-desc { color: rgba(0,0,0,0.6); }
+
+  .cell-cta {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--lime);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .grid-cell.lime .cell-cta { color: var(--dark); }
+  .grid-cell.cyan .cell-cta { color: var(--dark); }
+  .cell-cta::after {
+    content: '→';
+    font-size: 11px;
+    transition: transform 0.2s;
+  }
+  .grid-cell:hover .cell-cta::after { transform: translateX(4px); }
+
+  .grid-cell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0);
+    transition: background 0.3s;
+    z-index: 1;
+  }
+  .grid-cell:hover::before { background: rgba(0,0,0,0.08); }
+
+  /* ── BANNER ── */
+  .banner-section {
+    background: var(--dark);
+    padding: 80px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+  .banner-heading {
+    font-family: 'Boldonse', sans-serif;
+    font-weight: 400;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    text-transform: uppercase;
+    color: var(--white);
+    line-height: 1.05;
+  }
+  .banner-heading em {
+    font-style: normal;
+    color: var(--lime);
+  }
+  .banner-body {
+    font-size: 14px;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 32px;
+  }
+
+  /* ── BODIES TEASER ── */
+  .bodies-section {
+    position: relative;
+    height: 560px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bodies-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: brightness(0.55);
+    transition: transform 0.6s ease;
+  }
+  .bodies-section:hover .bodies-bg { transform: scale(1.03); }
+  .bodies-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 40px;
+  }
+  .bodies-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 20px;
+  }
+  .bodies-heading {
+    font-family: 'Boldonse', sans-serif;
+    font-weight: 400;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    text-transform: uppercase;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 28px;
+    letter-spacing: 0.02em;
+  }
+  .bodies-heading span { color: var(--lime); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--dark);
+    padding: 0 80px 40px;
+    position: relative;
+  }
+  .footer-dome {
+    width: 140%;
+    margin-left: -20%;
+    height: 100px;
+    background: var(--dark);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    transform: scaleY(0);
+    transform-origin: bottom center;
+    margin-bottom: -2px;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+  .footer-logo {
+    font-family: var(--font-body);
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+  .footer-logo span {
+    display: block;
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    color: var(--cyan);
+    margin-top: 3px;
+  }
+  .footer-tagline {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.6;
+    margin-top: 12px;
+  }
+  .footer-heading {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 20px;
+  }
+  .footer-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .footer-links a {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--lime); }
+  .footer-info {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.8;
+  }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-copy {
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+  }
+  .social-links {
+    display: flex;
+    gap: 16px;
+  }
+  .social-links a {
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .social-links a:hover {
+    border-color: var(--lime);
+    color: var(--lime);
+  }
+
+  /* ── REVEAL ── */
+  .reveal { clip-path: inset(0px 0px 100% 0px); }
+</style>
+</head>
+<body>
+
+<div class="custom-cursor" id="cursor"></div>
+
+<div class="topbar" id="topbar"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    ROYA FIT
+    <span>concierge</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#" class="active">Home</a></li>
+    <li><a href="#">About Us</a></li>
+    <li><a href="#">Services</a></li>
+    <li><a href="#">Squad</a></li>
+    <li><a href="#">Classes</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="#" class="btn-signin">Sign In</a>
+    <button class="nav-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-scroll-hero has-grain" id="hero">
+
+    <div class="hero-bg-photo">
+      <img src="hero-backgournd-royafit.png" alt="RoyaFit">
+    </div>
+
+    <div class="hero-bg-mandala" id="mandalaWrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" fill="none" stroke="currentColor">
+        <g transform="translate(400,400)">
+          <circle r="380" stroke-width="0.5" opacity="0.4"/>
+          <circle r="350" stroke-width="0.3" opacity="0.25"/>
+          <circle r="310" stroke-width="1"   opacity="0.5"/>
+          <circle r="270" stroke-width="0.3" opacity="0.25"/>
+          <circle r="230" stroke-width="1"   opacity="0.5"/>
+          <circle r="190" stroke-width="0.3" opacity="0.25"/>
+          <circle r="150" stroke-width="1"   opacity="0.5"/>
+          <circle r="110" stroke-width="0.3" opacity="0.25"/>
+          <circle r="70"  stroke-width="1"   opacity="0.5"/>
+          <circle r="28"  stroke-width="1"   opacity="0.6"/>
+          <g stroke-width="0.4" opacity="0.35">
+            <line x1="0" y1="-380" x2="0"   y2="380"/>
+            <line x1="380" y1="0"  x2="-380" y2="0"/>
+            <line x1="269" y1="-269" x2="-269" y2="269"/>
+            <line x1="269" y1="269"  x2="-269" y2="-269"/>
+            <line x1="0" y1="-380" x2="0"   y2="380"    transform="rotate(22.5)"/>
+            <line x1="380" y1="0"  x2="-380" y2="0"     transform="rotate(22.5)"/>
+            <line x1="269" y1="-269" x2="-269" y2="269"  transform="rotate(22.5)"/>
+            <line x1="269" y1="269"  x2="-269" y2="-269" transform="rotate(22.5)"/>
+          </g>
+          <g stroke-width="0.9" opacity="0.45">
+            <ellipse rx="26" ry="64" transform="rotate(0)   translate(0,-230)"/>
+            <ellipse rx="26" ry="64" transform="rotate(30)  translate(0,-230)"/>
+            <ellipse rx="26" ry="64" transform="rotate(60)  translate(0,-230)"/>
+            <ellipse rx="26" ry="64" transform="rotate(90)  translate(0,-230)"/>
+            <ellipse rx="26" ry="64" transform="rotate(120) translate(0,-230)"/>
+            <ellipse rx="26" ry="64" transform="rotate(150) translate(0,-230)"/>
+            <ellipse rx="26" ry="64" transform="rotate(180) translate(0,-230)"/>
+            <ellipse rx="26" ry="64" transform="rotate(210) translate(0,-230)"/>
+            <ellipse rx="26" ry="64" transform="rotate(240) translate(0,-230)"/>
+            <ellipse rx="26" ry="64" transform="rotate(270) translate(0,-230)"/>
+            <ellipse rx="26" ry="64" transform="rotate(300) translate(0,-230)"/>
+            <ellipse rx="26" ry="64" transform="rotate(330) translate(0,-230)"/>
+          </g>
+          <g stroke-width="0.9" opacity="0.45">
+            <rect x="-14" y="-164" width="28" height="28" transform="rotate(0)   rotate(45,0,-150)"/>
+            <rect x="-14" y="-164" width="28" height="28" transform="rotate(45)  rotate(45,0,-150)"/>
+            <rect x="-14" y="-164" width="28" height="28" transform="rotate(90)  rotate(45,0,-150)"/>
+            <rect x="-14" y="-164" width="28" height="28" transform="rotate(135) rotate(45,0,-150)"/>
+            <rect x="-14" y="-164" width="28" height="28" transform="rotate(180) rotate(45,0,-150)"/>
+            <rect x="-14" y="-164" width="28" height="28" transform="rotate(225) rotate(45,0,-150)"/>
+            <rect x="-14" y="-164" width="28" height="28" transform="rotate(270) rotate(45,0,-150)"/>
+            <rect x="-14" y="-164" width="28" height="28" transform="rotate(315) rotate(45,0,-150)"/>
+          </g>
+          <g stroke-width="1" opacity="0.5">
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(0)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(15)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(30)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(45)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(60)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(75)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(90)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(105)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(120)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(135)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(150)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(165)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(180)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(195)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(210)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(225)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(240)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(255)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(270)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(285)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(300)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(315)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(330)"/>
+            <line x1="0" y1="-374" x2="0" y2="-386" transform="rotate(345)"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="hero-text-panel">
+      <div class="hero-headline-wrap">
+        <div class="hero-eyebrow">MIAMI BEACH</div>
+        <div class="hero-line hero-line--static">FITNESS</div>
+
+        <div class="hero-line hero-line--cycle" id="cycleLine2">
+          <div class="cycle-word active" data-step="0">MEETS</div>
+          <div class="cycle-word"        data-step="1">FOR</div>
+          <div class="cycle-word"        data-step="2">ON</div>
+        </div>
+
+        <div class="hero-line hero-line--cycle" id="cycleLine3">
+          <div class="cycle-word active" data-step="0">LUXURY</div>
+          <div class="cycle-word"        data-step="1">HOTELS</div>
+          <div class="cycle-word"        data-step="2">DEMAND</div>
+        </div>
+
+        <div class="hero-cta-wrap btn-split">
+          <a href="#" class="btn-primary">Explore Services</a>
+          <a href="#" class="btn-arrow">→</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-progress">
+      <div class="hero-progress-dot active" data-dot="0"></div>
+      <div class="hero-progress-dot"        data-dot="1"></div>
+      <div class="hero-progress-dot"        data-dot="2"></div>
+    </div>
+
+    <div class="hero-scroll-hint">
+      <span>scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+
+  </section>
+
+<!-- WELCOME -->
+<section class="welcome">
+  <div class="welcome-photo">
+    <img src="RF-aerial-yoga-1.jpg" alt="RoyaFit aerial yoga">
+    <div class="welcome-frame"></div>
+  </div>
+  <div class="welcome-content has-grain">
+    <p class="section-eyebrow reveal">Welcome to RoyaFit</p>
+    <h2 class="section-heading reveal">GUIDING YOU TO YOUR<br><em>NEXT LEVEL</em></h2>
+    <p class="section-body reveal">RoyaFit's vision is to lead the world of fitness through diverse, inspired, top quality, unsurpassed fitness experiences.<br><br>
+    RoyaFit's mission is to consistently create luxury fitness experiences, through exceptional service, where both clients and team members experience the highest levels of fulfillment.</p>
+    <div class="hero-cta btn-split reveal">
+      <a href="#" class="btn-primary">Read More</a>
+      <a href="#" class="btn-arrow">→</a>
+    </div>
+  </div>
+</section>
+
+<!-- CLASSES -->
+<section class="classes-section has-grain">
+  <div class="classes-intro">
+    <div>
+      <p class="section-eyebrow">What we offer</p>
+      <h2 class="section-heading" style="margin-bottom:0;">OUR <em>CLASSES</em></h2>
+    </div>
+    <a href="#" style="font-size:10px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:var(--dark);text-decoration:none;">View All Classes →</a>
+  </div>
+
+  <div class="classes-grid">
+    <!-- Row 1 -->
+    <div class="grid-cell dark">
+      <div class="cell-content">
+        <p class="cell-tag">Bootcamp</p>
+        <h3 class="cell-title">Sweat Therapy</h3>
+        <p class="cell-desc">RoyaFit signature bootcamps include 60-minute full body workouts.</p>
+        <a href="#" class="cell-cta">Read More</a>
+      </div>
+    </div>
+    <div class="grid-cell photo">
+      <img src="Sweat Therapy.png" alt="Sweat Therapy bootcamp">
+    </div>
+    <div class="grid-cell lime">
+      <div class="cell-content">
+        <p class="cell-tag">Bootcamp</p>
+        <h3 class="cell-title">Boxing Bootcamp</h3>
+        <p class="cell-desc">Have you ever wanted to train like a fighter? Let us show you how.</p>
+        <a href="#" class="cell-cta">Read More</a>
+      </div>
+    </div>
+    <div class="grid-cell photo">
+      <img src="Boxing.png" alt="Boxing Bootcamp">
+    </div>
+    <!-- Row 2 -->
+    <div class="grid-cell photo">
+      <img src="Aerial.png" alt="Ninja Bootcamp">
+    </div>
+    <div class="grid-cell lime">
+      <div class="cell-content">
+        <p class="cell-tag">Bootcamp</p>
+        <h3 class="cell-title">Ninja Bootcamp</h3>
+        <p class="cell-desc">High energy drills that increase your stamina and test your goals.</p>
+        <a href="#" class="cell-cta">Read More</a>
+      </div>
+    </div>
+    <div class="grid-cell photo">
+      <img src="Yoga.png" alt="Awaken Yoga">
+    </div>
+    <div class="grid-cell dark">
+      <div class="cell-content">
+        <p class="cell-tag">Mind &amp; Body</p>
+        <h3 class="cell-title">Awaken Yoga</h3>
+        <p class="cell-desc">Wake your body and mind with yoga postures, breath, and meditation.</p>
+        <a href="#" class="cell-cta">Read More</a>
+      </div>
+    </div>
+    <!-- Row 3 -->
+    <div class="grid-cell dark">
+      <div class="cell-content">
+        <p class="cell-tag">Mind &amp; Body</p>
+        <h3 class="cell-title">Beer Yoga | Vino Vinyasa</h3>
+        <p class="cell-desc">Breathe, balance your drink and body, and flow through Vinyasa.</p>
+        <a href="#" class="cell-cta">Read More</a>
+      </div>
+    </div>
+    <div class="grid-cell photo">
+      <img src="Dance.png" alt="Beer Yoga Vino Vinyasa">
+    </div>
+    <div class="grid-cell lime">
+      <div class="cell-content">
+        <p class="cell-tag">Cardio</p>
+        <h3 class="cell-title">Bounce</h3>
+        <p class="cell-desc">A cardio trampoline workout that builds fitness, agility, and confidence.</p>
+        <a href="#" class="cell-cta">Read More</a>
+      </div>
+    </div>
+    <div class="grid-cell photo">
+      <img src="Placeholder.png" alt="Bounce class">
+    </div>
+  </div>
+</section>
+
+<!-- TEAM BUILDING BANNER -->
+<section class="banner-section">
+  <div>
+    <h2 class="banner-heading reveal">TEAM <em>BUILDING</em><br>EVENTS</h2>
+  </div>
+  <div>
+    <p class="banner-body reveal">Bring your team together with a unique fitness experience. RoyaFit corporate events are designed to build culture, boost morale, and create lasting connections — all while breaking a serious sweat.</p>
+    <div class="hero-cta btn-split reveal">
+      <a href="#" class="btn-primary">Learn More</a>
+      <a href="#" class="btn-arrow">→</a>
+    </div>
+  </div>
+</section>
+
+<!-- BODIES TEASER -->
+<section class="bodies-section">
+  <img src="Bodies2000_1.jpg" alt="Bodies by RoyaFit" class="bodies-bg" id="bodiesBg">
+  <div class="bodies-content">
+    <p class="bodies-tag">Photography Series</p>
+    <h2 class="bodies-heading">BODIES BY<br><span>ROYAFIT</span></h2>
+    <div class="hero-cta btn-split reveal" style="justify-content:center;">
+      <a href="#" class="btn-primary">View the Series</a>
+      <a href="#" class="btn-arrow">→</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="footer">
+  <div class="footer-dome" id="footerDome"></div>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">
+        ROYA FIT
+        <span>concierge</span>
+      </div>
+      <p class="footer-tagline">Luxury fitness experiences through exceptional service.</p>
+    </div>
+    <div>
+      <p class="footer-heading">Quick Links</p>
+      <ul class="footer-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Classes</a></li>
+        <li><a href="#">Services</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-heading">Find Us</p>
+      <p class="footer-info">
+        Miami Beach, FL 33139<br>
+        Mon–Sat 8:00 – 18:00<br><br>
+        hello@royafit.com<br>
+        +1 (305) 000-0000
+      </p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2024 RoyaFit LLC. All rights reserved.</p>
+    <div class="social-links">
+      <a href="#">f</a>
+      <a href="#">in</a>
+      <a href="#">ig</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// ── LENIS SMOOTH SCROLL ──────────────────────────────────────────────────────
+const lenis = new Lenis();
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add((time) => lenis.raf(time * 1000));
+gsap.ticker.lagSmoothing(0);
+
+// ── TOPBAR ───────────────────────────────────────────────────────────────────
+gsap.to('#topbar', {
+  width: '100%',
+  duration: 0.8,
+  ease: 'power3.inOut'
+});
+
+// ── MANDALA SLOW SPIN ─────────────────────────────────────────────────────────
+gsap.to('#mandalaWrap svg', {
+  rotation: 360,
+  duration: 120,
+  repeat: -1,
+  ease: 'none',
+  transformOrigin: '50% 50%'
+});
+
+// ── SCROLL HERO WORD SWAP ─────────────────────────────────────────────────────
+const totalSteps = 3;
+let currentStep  = 0;
+
+const line2Words = document.querySelectorAll('#cycleLine2 .cycle-word');
+const line3Words = document.querySelectorAll('#cycleLine3 .cycle-word');
+
+// Split each word element into individual character spans
+function splitChars(el) {
+  const text = el.textContent.trim();
+  el.textContent = '';
+  return [...text].map(ch => {
+    const s = document.createElement('span');
+    s.textContent = ch === ' ' ? '\u00a0' : ch;
+    s.style.cssText = 'display:inline-block;will-change:transform;';
+    el.appendChild(s);
+    return s;
+  });
+}
+
+const l2c = Array.from(line2Words).map(w => splitChars(w));
+const l3c = Array.from(line3Words).map(w => splitChars(w));
+
+// Set initial positions: step 0 visible, rest below
+l2c.forEach((chars, i) => gsap.set(chars, { y: i === 0 ? '0%' : '110%' }));
+l3c.forEach((chars, i) => gsap.set(chars, { y: i === 0 ? '0%' : '110%' }));
+
+function goToStep(step) {
+  if (step === currentStep) return;
+  const dots = document.querySelectorAll('.hero-progress-dot');
+  const out = currentStep, inn = step;
+
+  gsap.killTweensOf([...l2c[out], ...l2c[inn], ...l3c[out], ...l3c[inn]]);
+
+  // Outgoing: chars slide up and out, left-to-right stagger
+  gsap.to(l2c[out], {
+    y: '-115%', duration: 0.6, ease: 'power3.inOut',
+    stagger: { each: 0.03, from: 'start' },
+    onComplete: () => gsap.set(l2c[out], { y: '110%' })
+  });
+  gsap.to(l3c[out], {
+    y: '-115%', duration: 0.6, ease: 'power3.inOut',
+    stagger: { each: 0.03, from: 'start' }, delay: 0.06,
+    onComplete: () => gsap.set(l3c[out], { y: '110%' })
+  });
+
+  // Incoming: chars rise up from below, left-to-right stagger
+  gsap.fromTo(l2c[inn],
+    { y: '110%' },
+    { y: '0%', duration: 0.75, ease: 'power3.out', stagger: { each: 0.03, from: 'start' }, delay: 0.12 }
+  );
+  gsap.fromTo(l3c[inn],
+    { y: '110%' },
+    { y: '0%', duration: 0.75, ease: 'power3.out', stagger: { each: 0.03, from: 'start' }, delay: 0.22 }
+  );
+
+  dots.forEach((d, i) => d.classList.toggle('active', i === step));
+  currentStep = step;
+}
+
+ScrollTrigger.create({
+  trigger: '#hero',
+  start: 'top top',
+  end: '+=600vh',
+  pin: true,
+  pinSpacing: true,
+  onUpdate: (self) => {
+    const step = Math.min(Math.floor(self.progress * totalSteps), totalSteps - 1);
+    goToStep(step);
+  }
+});
+
+// ── FOOTER BOUNCE ─────────────────────────────────────────────────────────────
+ScrollTrigger.create({
+  trigger: '#footer',
+  start: 'top bottom',
+  onEnter: () => {
+    gsap.fromTo('#footerDome',
+      { scaleY: 0 },
+      { scaleY: 1, duration: 1.8, ease: 'elastic.out(1.1, 0.38)', overwrite: true }
+    );
+  },
+  onLeaveBack: () => {
+    gsap.set('#footerDome', { scaleY: 0 });
+  }
+});
+
+// ── CUSTOM CURSOR ─────────────────────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+
+document.addEventListener('mousemove', (e) => {
+  gsap.to(cursor, {
+    x: e.clientX,
+    y: e.clientY,
+    duration: 0.15,
+    ease: 'power2.out'
+  });
+});
+
+document.querySelectorAll('.grid-cell.photo, section img').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('cursor-large'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-large'));
+});
+
+document.querySelectorAll('a, button').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.classList.remove('cursor-large');
+    cursor.classList.add('cursor-small');
+  });
+  el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-small'));
+});
+
+// ── GRID CELL HOVER ───────────────────────────────────────────────────────────
+document.querySelectorAll('.grid-cell').forEach(cell => {
+  const tag  = cell.querySelector('.cell-tag');
+  const desc = cell.querySelector('.cell-desc');
+
+  cell.addEventListener('mouseenter', () => {
+    gsap.to(cell, { scale: 1.03, zIndex: 10, duration: 0.3, ease: 'power2.out' });
+    if (tag)  gsap.to(tag,  { y: -6, opacity: 1, duration: 0.3, ease: 'power2.out' });
+    if (desc) gsap.to(desc, { opacity: 1, y: 0,  duration: 0.3, ease: 'power2.out' });
+  });
+  cell.addEventListener('mouseleave', () => {
+    gsap.to(cell, { scale: 1, zIndex: 1, duration: 0.3, ease: 'power2.out' });
+    if (tag)  gsap.to(tag,  { y: 0, opacity: 0.6, duration: 0.3, ease: 'power2.out' });
+    if (desc) gsap.to(desc, { opacity: 0, y: 8,   duration: 0.3, ease: 'power2.out' });
+  });
+});
+
+// ── SCROLL REVEALS — CLIP-PATH ────────────────────────────────────────────────
+gsap.utils.toArray('.reveal').forEach((el, i) => {
+  const siblings = el.parentElement
+    ? Array.from(el.parentElement.querySelectorAll('.reveal'))
+    : [];
+  const delay = siblings.indexOf(el) * 0.12;
+
+  gsap.to(el, {
+    clipPath: 'inset(0px 0px -8px 0px)',
+    duration: 0.9,
+    ease: 'power3.out',
+    delay,
+    scrollTrigger: {
+      trigger: el.parentElement || el,
+      start: 'top 82%',
+    }
+  });
+});
+
+// Classes grid stagger
+gsap.from('.grid-cell', {
+  opacity: 0,
+  y: 40,
+  duration: 0.6,
+  stagger: 0.06,
+  ease: 'power3.out',
+  scrollTrigger: {
+    trigger: '.classes-grid',
+    start: 'top 80%',
+  }
+});
+
+// ── BODIES PARALLAX ───────────────────────────────────────────────────────────
+gsap.to('.bodies-heading', {
+  y: -60,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '.bodies-section',
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: true
+  }
+});
+</script>
+</body>
+</html>
